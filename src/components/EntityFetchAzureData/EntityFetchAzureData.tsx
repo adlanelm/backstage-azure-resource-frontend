@@ -25,29 +25,34 @@ import { Chip, Box } from '@material-ui/core';
 import FolderOpenIcon from '@material-ui/icons/FolderOpenOutlined';
 import { AZURE_ANNOTATION_TAG_SELECTOR } from '../entityData';
 
-type EntityResourceGroups = {
+type EntityResources = {
     id?: string;
     tenantId?: string;
+    subscriptionId: string;
     name: string;
     tags?: any;
+    type: string,
+    resourceGroupId?: any,
     resourceGroup?: any;
 };
 
 type DenseTableProps = {
-    rgs: EntityResourceGroups[];
+    rs: EntityResources[];
 };
 
 
-export const DenseTable = ({ rgs }: DenseTableProps) => {
+export const DenseTable = ({ rs: rs }: DenseTableProps) => {
 
   const columns: TableColumn[] = [
     { title: 'Id', field: 'id', hidden: true },
     { title: 'TenantId', field: 'tenantId', hidden: true },
     { title: 'Resource Group', field: 'resourceGroup' },
+    { title: 'Name', field: 'name' },
+    { title: 'Type', field: 'type' },
     { title: 'Tags', field: 'tags' }
   ];
 
-  const data = rgs.map(r => {
+  const data = rs.map(r => {
     const tags = [];
     for (const t in r.tags) {
         if (Object.prototype.hasOwnProperty.call(r.tags, t)) {
@@ -57,7 +62,9 @@ export const DenseTable = ({ rgs }: DenseTableProps) => {
         }
     }
     return {
-        resourceGroup: <a target="_blank" href={`https://portal.azure.com/#@${r.tenantId}/resource${r.id}`}>{r.resourceGroup}</a>,
+        resourceGroup: <a target="_blank" href={`https://portal.azure.com/#@${r.tenantId}/resource/subscriptions/${r.subscriptionId}/resourceGroups/${r.resourceGroup}`}>{r.resourceGroup}</a>,
+        name:<a target="_blank" href={`https://portal.azure.com/#@${r.tenantId}/resource${r.id}`}>{r.name}</a>,
+        type: r.type,
         tags: tags,
         id: r.id
     };
@@ -69,7 +76,7 @@ export const DenseTable = ({ rgs }: DenseTableProps) => {
         <Box display="flex" alignItems="center">
           <FolderOpenIcon style={{ fontSize: 30 }} />
         <Box mr={1} />
-            Resource groups
+            Related resources
         </Box>
       }
       options={{ search: false, paging: true, pageSize: 10 }}
@@ -90,7 +97,7 @@ export const GetEntityAzureResourceGroups = () => {
   
   const config = useApi(configApiRef);
   const backendUrl = config.getString('backend.baseUrl');
-  const { value, loading, error } = useAsync(async (): Promise<EntityResourceGroups[]> => {
+  const { value, loading, error } = useAsync(async (): Promise<EntityResources[]> => {
       const response = await fetch(`${backendUrl}/api/azure-resources/rg/${tagKey}/${tagValue}`);
       const json = await response.json();
       return json.data;
@@ -101,5 +108,5 @@ export const GetEntityAzureResourceGroups = () => {
       } else if (error) {
         return <Alert severity="error">{error.message}</Alert>;
       }
-    return <DenseTable rgs={value || []} />;
+    return <DenseTable rs={value || []} />;
 };
