@@ -6,7 +6,7 @@
     "url": "https://github.com/adlanelm/backstage-azure-resource-frontend/issues"
   },
   "contributors": [],
-  "version": "1.0.9",
+  "version": "1.0.10",
   "main": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
